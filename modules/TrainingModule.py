@@ -2,10 +2,10 @@ import os
 import pickle
 
 
-class TrainingModel:
+class TrainingModule:
     def __init__(self):
-        self.training_data_path = os.path.join(os.path.dirname(__file__), 'artifacts', 'training_data.pkl')
-        self.similarity_scores_path = os.path.join(os.path.dirname(__file__), 'artifacts', 'similarity_scores.pkl')
+        self.training_data_path = os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'training_data.pkl')
+        self.similarity_scores_path = os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
 
     def get_training_data_path(self):
         return self.training_data_path

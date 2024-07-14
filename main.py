@@ -1,13 +1,15 @@
-from typing import List, Dict
+from typing import Dict
 from fastapi import FastAPI
-from train_model import TrainingModel
+from modules.TrainingModule import TrainingModule
 from modules.MachineLearningModel import MachineLearningModel
 
 app = FastAPI()
-training_model = TrainingModel()
-training_model.train_model()
+training_module = TrainingModule()
+training_module.train_model()
 
-movie_recommender = MachineLearningModel(training_model.load_training_data(), training_model.load_similarity_scores_data())
+movie_recommender = MachineLearningModel(
+    training_module.load_training_data(), training_module.load_similarity_scores_data()
+)
 
 
 @app.get("/", response_model=Dict)
