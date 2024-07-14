@@ -108,8 +108,8 @@ class MachineLearningModel:
         except IndexError:
             return []
 
-    def dump_data(self):
-        return {"training_data": self.training_data.to_json(orient='records')}
+    def get_movie_titles(self):
+        return self.training_data["title"].values.tolist()
 
     def pickle_data(self):
         training_data_path = os.path.abspath(
@@ -120,6 +120,9 @@ class MachineLearningModel:
             os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
         )
         pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
+
+    # def dump_data(self):
+    #     return {"training_data": self.training_data.to_json(orient='records')}
 
     # # Alternative method using a regular loop
     # def get_recommendations_alternative(self, movie_title):

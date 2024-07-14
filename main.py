@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import List, Dict
 from fastapi import FastAPI
 from modules.TrainingModule import TrainingModule
 from modules.MachineLearningModel import MachineLearningModel
@@ -23,3 +23,10 @@ def index():
 def get_recommendation(movie_title: str):
     recommendations = movie_recommender.get_recommendations(movie_title)
     return {"movie_title": movie_title, "recommendations": recommendations}
+
+
+@app.get("/get-movie-titles", response_model=Dict)
+def get_movie_titles():
+    titles = movie_recommender.get_movie_titles()
+    print(type(titles))
+    return {"movie_titles": movie_recommender.get_movie_titles()}
