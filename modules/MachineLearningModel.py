@@ -6,6 +6,7 @@ import json
 import re
 from nltk.stem import PorterStemmer
 from sklearn.metrics.pairwise import cosine_similarity
+import pickle
 
 text_stemmer = PorterStemmer()
 count_vectorizer = CountVectorizer(max_features=5000, stop_words="english")
@@ -87,10 +88,14 @@ def load_machine_learning_data():
 
 
 class MachineLearningModel:
-    def __init__(self):
-        training_model = load_machine_learning_data()
-        self.similarity_scores = training_model["similarity_scores"]
-        self.training_data = training_model["training_data"]
+    def __init__(self, training_data=None, similarity_scores=None):
+        if training_data is not None and similarity_scores is not None:
+            self.training_data = training_data
+            self.similarity_scores = similarity_scores
+        else:
+            training_model = load_machine_learning_data()
+            self.training_data = training_model["training_data"]
+            self.similarity_scores = training_model["similarity_scores"]
 
     def get_recommendations(self, movie_title):
         try:
@@ -105,6 +110,16 @@ class MachineLearningModel:
 
     def dump_data(self):
         return {"training_data": self.training_data.to_json(orient='records')}
+
+    def pickle_data(self):
+        training_data_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'training_data.pkl')
+        )
+        pickle.dump(self.training_data, open(training_data_path, 'wb'))
+        similarity_score_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
+        )
+        pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
 
     # # Alternative method using a regular loop
     # def get_recommendations_alternative(self, movie_title):
