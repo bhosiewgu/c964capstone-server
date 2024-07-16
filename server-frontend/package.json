@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite build --mode development --emptyOutDir",
-    "build": "cross-env vite build --emptyOutDir && node ./generate_robots_txt.js",
+    "clean": "rimraf ../www",
+    "build": "cross-env MY_CUSTOM_ENV=development npm run create-env && npm run clean && vite build --mode development --emptyOutDir",
+    "build:prod": "cross-env npm run create-env && npm run clean && vite build --emptyOutDir && node ./generate_robots_txt.js",
+    "create-env": "cross-env rimraf ./src/build-constants.js && node ./create-env.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -18,11 +20,11 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "cross-env": "^7.0.3",
-    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.2",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
+    "rimraf": "^6.0.1",
     "vite": "^5.3.1"
   }
 }

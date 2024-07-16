@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'http://localhost:8000';
+import { API_URL } from './build-constants'
 
 export async function getRecommendation(movieTitle) {
     if (!movieTitle) {
