@@ -2,8 +2,15 @@ from typing import List, Dict
 from fastapi import FastAPI
 from modules.TrainingModule import TrainingModule
 from modules.MachineLearningModel import MachineLearningModel
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="www"), name="static")
+app.mount("/assets", StaticFiles(directory="www/assets"), name="assets")
+
+
 training_module = TrainingModule()
 training_module.train_model()
 
@@ -12,11 +19,9 @@ movie_recommender = MachineLearningModel(
 )
 
 
-@app.get("/", response_model=Dict)
+@app.get("/")
 def index():
-    # recommendations = movie_recommender.get_recommendations(movie_title)
-    # return {"recommendations": recommendations}
-    return {"items": {"name": "Hammer", "category": "Tool"}}
+    return FileResponse("www/index.html")
 
 
 @app.get("/recommendation/{movie_title}", response_model=Dict)
