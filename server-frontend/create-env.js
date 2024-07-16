@@ -8,9 +8,10 @@ let API_URL;
 console.log('node_env', process.env.MY_CUSTOM_ENV)
 
 if (process.env.MY_CUSTOM_ENV === 'development') {
-    API_URL = "http://localhost:8000";
+    API_URL = "http://localhost:8002";
 } else {
-    API_URL = "https://c964capstone-3cdvungrkq-uc.a.run.app:8000"
+//    API_URL = "https://c964capstone-3cdvungrkq-uc.a.run.app:8000"
+    API_URL = "http://localhost:8002";
 }
 
 const fileContents = `export const API_URL = \"${API_URL}\";`

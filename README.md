@@ -16,3 +16,4 @@ docker run -p 8000:8000 -e API_URL="https://c964capstone-3cdvungrkq-uc.a.run.app
 
 docker login  -u bhosiewgu
 docker push bhosiewgu/c964capstone:1.0.0
+docker push bhosiewgu/c964capstone:1.0.0-prod
