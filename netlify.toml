@@ -1,0 +1,15 @@
+[build]
+  functions = "netlify-functions"  # Directory for serverless functions
+  publish = "public"               # Directory for static files
+
+[[redirects]]
+  from = "/api/*"                 # Redirect API requests to serverless function
+  to = "/.netlify/functions/fastapi"
+  status = 200                    # Redirect status code
+  force = true                    # Force the redirect to ensure it takes effect
+
+[[headers]]
+  # Add custom headers if needed
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"  # Example cache control header
