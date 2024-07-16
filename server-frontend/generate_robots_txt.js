@@ -1,10 +1,13 @@
 // change this to check in
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const robotsTxtContent = `User-agent: *
-Disallow: /`
+Disallow: /`;
 
-const pathToWWW = path.resolve(__dirname, '..', 'www')
+const pathToWWW = path.resolve(__dirname, '..', 'www');
 
-fs.writeFleSync(`${pathToWWW}/robots.txt`, robotsTxtContent)
+fs.writeFileSync(`${pathToWWW}/robots.txt`, robotsTxtContent);
