@@ -14,6 +14,7 @@ export async function getRecommendation(movieTitle) {
 }
 
 export async function getMovieTitles() {
+    console.log('APIURL', API_URL)
     try {
         const response = await fetch(`${API_URL}/get-movie-titles`); // Fetch data from the same server
         const { movie_titles } = await response.json();
