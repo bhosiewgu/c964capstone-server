@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import Autocomplete from '@mui/joy/Autocomplete';
+import Input from '@mui/joy/Input';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { getMovieTitles } from './routes'
+import { getMovieTitles, dumpData } from './routes'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -12,35 +14,16 @@ function App() {
       movieTitles.sort((a, b) => a.localeCompare(b));
       setMovieTitles(movieTitles)
   }, [])
+  useEffect(async() => {
+      await dumpData();
+  }, [])
 
   return (
     <>
       <div>
-          <h1>hello world</h1>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <h1>WatchFlicks</h1>
+        <Autocomplete options={movieTitles} placeholder={'Get Recommendations'}/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <div>
-          {movieTitles.map((title) => (
-              <p key={title}>{title}</p>
-          ))}
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }

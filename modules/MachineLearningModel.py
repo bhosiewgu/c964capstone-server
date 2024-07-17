@@ -121,8 +121,8 @@ class MachineLearningModel:
         )
         pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
 
-    # def dump_data(self):
-    #     return {"training_data": self.training_data.to_json(orient='records')}
+    def dump_data(self):
+        return {"training_data": self.training_data.to_json(orient='records')}
 
     # # Alternative method using a regular loop
     # def get_recommendations_alternative(self, movie_title):
