@@ -32,8 +32,7 @@ training_module.train_model()
 
 movie_recommender = MachineLearningModel(
     training_module.load_training_data(),
-    training_module.load_similarity_scores_data(),
-    training_module.load_original_movie_data()
+    training_module.load_similarity_scores_data()
 )
 
 

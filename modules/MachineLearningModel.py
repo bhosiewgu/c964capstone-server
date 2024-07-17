@@ -78,18 +78,16 @@ def load_machine_learning_data():
 
     # dump_pickle_object(training_data, "movie_list.pkl")
     # dump_pickle_object(similarity_scores, "similarity_scores.pkl")
-    return {"similarity_scores": similarity_scores, "training_data": training_data, "original_movie_data":movies}
+    return {"similarity_scores": similarity_scores, "training_data": training_data}
 
 
 class MachineLearningModel:
-    def __init__(self, training_data=None, similarity_scores=None, original_movie_data=None):
+    def __init__(self, training_data=None, similarity_scores=None):
         if training_data is not None and similarity_scores is not None:
-            self.original_movie_data = original_movie_data
             self.training_data = training_data
             self.similarity_scores = similarity_scores
         else:
             training_model = load_machine_learning_data()
-            self.original_movie_data = training_model["original_movie_data"]
             self.training_data = training_model["training_data"]
             self.similarity_scores = training_model["similarity_scores"]
 
@@ -105,7 +103,7 @@ class MachineLearningModel:
             return []
 
     def get_movie_titles(self):
-        return self.original_movie_data["title"].values.tolist()
+        return self.training_data["title"].values.tolist()
 
     def pickle_data(self):
         training_data_path = os.path.abspath(
@@ -116,10 +114,6 @@ class MachineLearningModel:
             os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
         )
         pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
-        original_movie_data_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'original_movie_data.pkl')
-        )
-        pickle.dump(self.original_movie_data, open(original_movie_data_path, 'wb'))
 
     def dump_data(self):
         return {"training_data": self.training_data.to_json(orient='records')}
