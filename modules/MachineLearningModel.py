@@ -20,11 +20,6 @@ def get_resource(name):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'movies-archive-data', name))
 
 
-# def dump_pickle_object(obj, name):
-#     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'artifacts', name))
-#     pickle.dump(obj, open(path, 'wb'))
-
-
 def normalize_column(json_data, column_key, item_count=-1):
     my_obj = json.loads(json_data)
     end_index = len(my_obj) if item_count <= 0 else item_count
@@ -35,8 +30,8 @@ def normalize_column(json_data, column_key, item_count=-1):
 
 def pluck_director(json_data):
     my_obj = json.loads(json_data)
-    director = [item["name"] for item in my_obj if item["job"] == "Director"]
-    # director = [re.sub(r'\s+', '', item["name"]) for item in my_obj if item["job"] == "Director"]
+    # director = [item["name"] for item in my_obj if item["job"] == "Director"]
+    director = [re.sub(r'\s+', '', item["name"]) for item in my_obj if item["job"] == "Director"]
     return director
 
 
@@ -59,9 +54,8 @@ def load_machine_learning_data():
     movies["keywords"] = movies["keywords"].apply(lambda json_data: normalize_column(json_data, "name"))
     movies["cast"] = movies["cast"].apply(lambda json_data: normalize_column(json_data, "name", 3))
     movies["crew"] = movies["crew"].apply(pluck_director)
-    movies["overview"] = movies["overview"].apply(lambda str: str.split())
-    movies["tags"] = movies["overview"] + movies["overview"] + movies["genres"] + movies["keywords"] + movies["cast"] + \
-                     movies["crew"]
+    movies["overview"] = movies["overview"].apply(lambda str_data: str_data.split())
+    movies["tags"] = movies["overview"] + movies["genres"] + movies["keywords"] + movies["cast"] + movies["crew"]
 
     # print(movies.loc[0, 'genres'])
     # print(movies.loc[0, 'keywords'])
@@ -75,25 +69,27 @@ def load_machine_learning_data():
     training_data["tags"] = training_data["tags"].apply(lambda str_text: str_text.lower())
     training_data["tags"] = training_data["tags"].apply(stem_text)
 
-    print(training_data.loc[0], "movie_id")
-    print(training_data.loc[0], "title")
-    print(training_data.loc[0], "tags")
+    # print(training_data.loc[0], "movie_id")
+    # print(training_data.loc[0], "title")
+    # print(training_data.loc[0], "tags")
 
     similarity_vectors = count_vectorizer.fit_transform(training_data["tags"]).toarray()
     similarity_scores = cosine_similarity(similarity_vectors)
 
     # dump_pickle_object(training_data, "movie_list.pkl")
     # dump_pickle_object(similarity_scores, "similarity_scores.pkl")
-    return {"similarity_scores": similarity_scores, "training_data": training_data}
+    return {"similarity_scores": similarity_scores, "training_data": training_data, "original_movie_data":movies}
 
 
 class MachineLearningModel:
-    def __init__(self, training_data=None, similarity_scores=None):
+    def __init__(self, training_data=None, similarity_scores=None, original_movie_data=None):
         if training_data is not None and similarity_scores is not None:
+            self.original_movie_data = original_movie_data
             self.training_data = training_data
             self.similarity_scores = similarity_scores
         else:
             training_model = load_machine_learning_data()
+            self.original_movie_data = training_model["original_movie_data"]
             self.training_data = training_model["training_data"]
             self.similarity_scores = training_model["similarity_scores"]
 
@@ -109,7 +105,7 @@ class MachineLearningModel:
             return []
 
     def get_movie_titles(self):
-        return self.training_data["title"].values.tolist()
+        return self.original_movie_data["title"].values.tolist()
 
     def pickle_data(self):
         training_data_path = os.path.abspath(
@@ -120,6 +116,10 @@ class MachineLearningModel:
             os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
         )
         pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
+        original_movie_data_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'original_movie_data.pkl')
+        )
+        pickle.dump(self.original_movie_data, open(original_movie_data_path, 'wb'))
 
     def dump_data(self):
         return {"training_data": self.training_data.to_json(orient='records')}
