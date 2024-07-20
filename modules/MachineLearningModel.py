@@ -97,7 +97,13 @@ class MachineLearningModel:
             distances = sorted(list(enumerate(self.similarity_scores[index])), reverse=True, key=lambda x: x[1])
 
             # Using list comprehension to collect recommendations
-            recommendations = [self.training_data.iloc[i[0]].title for i in distances[1:6]]
+            recommendations = [
+                {
+                    'title': self.training_data.iloc[i[0]]['title'],
+                    'movie_id': int(self.training_data.iloc[i[0]]['movie_id'])
+                }
+                for i in distances[1:6]
+            ]
             return recommendations
         except IndexError:
             return []
