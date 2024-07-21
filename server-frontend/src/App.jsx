@@ -7,9 +7,11 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { getMovieTitles, getRecommendation } from './routes'
 
+const freshRecommendationsData = { recommendations: [] };
+
 function App() {
   const [movieTitles, setMovieTitles] = useState([])
-  const [recommendations, setRecommendations] = useState([])
+  const [recommendationsData, setRecommendationsData] = useState(freshRecommendationsData)
   const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {
@@ -42,16 +44,16 @@ function App() {
             disabled={isFetching}
             options={movieTitles}
             placeholder={'Get Recommendations'}
-            onChange={(e, newValue) => {
-                if (newValue) {
+            onChange={(e, newMovieTitle) => {
+                if (newMovieTitle) {
                     const fetchData = async () => {
                         setIsFetching(true)
                         try {
-//                             await new Promise(resolve => setTimeout(resolve, 5000))
-                            const recommendations = await getRecommendation(newValue);
-                            setRecommendations(recommendations);
+                            {/* { recommendations, original_movie_index, original_movie_title } */}
+                            const recommendations_data = await getRecommendation(newMovieTitle);
+                            setRecommendationsData(recommendations_data);
                         } catch (e) {
-                            setRecommendations([])
+                            setRecommendations(freshRecommendationsData)
                             console.error('error fetching recommendation', e)
                         } finally {
                             setIsFetching(false)
@@ -60,7 +62,7 @@ function App() {
 
                     fetchData();
                 } else {
-                    setRecommendations([])
+                    setRecommendations(freshRecommendationsData)
                 }
             }}
         />
@@ -72,11 +74,20 @@ function App() {
                   <CircularProgress />
               )
               : (
-                  <ul>
-                    {recommendations.map(({title, movie_id}, index) => (
-                        <li key={`${title}-${index}`}>{title} (Entity ID: {movie_id})</li>
-                    ))}
-                  </ul>
+                  <div>
+                      {Boolean(recommendationsData?.recommendations?.length) && (
+                          <>
+                              <p>
+                                  recommendations data for movie index {recommendationsData.original_movie_index}
+                              </p>
+                              <ul>
+                                  {recommendationsData?.recommendations?.map(({title, movie_id, movie_index}, index) => (
+                                    <li key={`${title}-${index}`}>{title} (Movie ID: {movie_id}, Movie Index: {movie_index})</li>
+                                  ))}
+                              </ul>
+                          </>
+                      )}
+                  </div>
               )
           }
       </div>

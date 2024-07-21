@@ -86,12 +86,13 @@ class MachineLearningModel:
             # Using list comprehension to collect recommendations
             recommendations = [
                 {
+                    'movie_index': int(i[0]),
                     'title': self.training_data.iloc[i[0]]['title'],
                     'movie_id': int(self.training_data.iloc[i[0]]['movie_id'])
                 }
                 for i in distances[1:6]
             ]
-            return recommendations
+            return {"recommendations": recommendations, "original_movie_index": int(index), "original_movie_title": movie_title}
         except IndexError:
             return []
 

@@ -7,8 +7,7 @@ export async function getRecommendation(movieTitle) {
 
     try {
         const response = await fetch(`/recommendation/${movieTitle}`); // Fetch data from the same server
-        const { recommendations } = await response.json();
-        return recommendations;
+        return await response.json();
     } catch (error) {
         return Promise.reject(error)
     }

@@ -43,8 +43,8 @@ def index():
 
 @app.get("/recommendation/{movie_title}", response_model=Dict)
 def get_recommendation(movie_title: str):
-    recommendations = movie_recommender.get_recommendations(movie_title)
-    return {"movie_title": movie_title, "recommendations": recommendations}
+    recommendations_data = movie_recommender.get_recommendations(movie_title)
+    return recommendations_data
 
 
 @app.get("/get-movie-titles", response_model=Dict)
