@@ -47,8 +47,8 @@ function App() {
       </div>
       <div>
           <ul>
-            {recommendations.map(({title}, index) => (
-                <li key={`${title}-${index}`}>{title}</li>
+            {recommendations.map(({title, movie_id}, index) => (
+                <li key={`${title}-${index}`}>{title} (Entity ID: {movie_id})</li>
             ))}
           </ul>
       </div>

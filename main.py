@@ -52,8 +52,3 @@ def get_movie_titles():
     titles = movie_recommender.get_movie_titles()
     print(type(titles))
     return {"movie_titles": movie_recommender.get_movie_titles()}
-
-
-@app.get("/dump-data", response_model=Dict)
-def dump_data():
-    return movie_recommender.dump_data()
