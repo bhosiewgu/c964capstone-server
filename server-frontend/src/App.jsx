@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Autocomplete from '@mui/joy/Autocomplete';
+import CircularProgress from '@mui/material/CircularProgress';
 import Input from '@mui/joy/Input';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
@@ -9,12 +10,20 @@ import { getMovieTitles, getRecommendation } from './routes'
 function App() {
   const [movieTitles, setMovieTitles] = useState([])
   const [recommendations, setRecommendations] = useState([])
+  const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
-        const movieTitles = await getMovieTitles();
-        movieTitles.sort((a, b) => a.localeCompare(b));
-        setMovieTitles(movieTitles)
+        setIsFetching(true)
+        try {
+            const movieTitles = await getMovieTitles();
+            movieTitles.sort((a, b) => a.localeCompare(b));
+            setMovieTitles(movieTitles)
+        } catch (e) {
+            setMovieTitles([])
+        } finally {
+            setIsFetching(false)
+        }
     };
 
     fetchData();
@@ -29,13 +38,21 @@ function App() {
       <div>
         <h1>WatchFlicks</h1>
         <Autocomplete
+            disabled={isFetching}
             options={movieTitles}
             placeholder={'Get Recommendations'}
             onChange={(e, newValue) => {
                 if (newValue) {
                     const fetchData = async () => {
-                        const recommendations = await getRecommendation(newValue);
-                        setRecommendations(recommendations);
+                        setIsFetching(true)
+                        try {
+                            const recommendations = await getRecommendation(newValue);
+                            setRecommendations(recommendations);
+                        } catch (e) {
+                            setRecommendations([])
+                        } finally {
+                            setIsFetching(false)
+                        }
                     };
 
                     fetchData();
@@ -46,11 +63,19 @@ function App() {
         />
       </div>
       <div>
-          <ul>
-            {recommendations.map(({title, movie_id}, index) => (
-                <li key={`${title}-${index}`}>{title} (Entity ID: {movie_id})</li>
-            ))}
-          </ul>
+          {
+              isFetching
+              ? (
+                  <CircularProgress />
+              )
+              : (
+                  <ul>
+                    {recommendations.map(({title, movie_id}, index) => (
+                        <li key={`${title}-${index}`}>{title} (Entity ID: {movie_id})</li>
+                    ))}
+                  </ul>
+              )
+          }
       </div>
     </>
   )
