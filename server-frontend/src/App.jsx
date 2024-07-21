@@ -47,6 +47,7 @@ function App() {
                     const fetchData = async () => {
                         setIsFetching(true)
                         try {
+//                             await new Promise(resolve => setTimeout(resolve, 5000))
                             const recommendations = await getRecommendation(newValue);
                             setRecommendations(recommendations);
                         } catch (e) {
