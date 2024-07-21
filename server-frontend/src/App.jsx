@@ -21,6 +21,7 @@ function App() {
             setMovieTitles(movieTitles)
         } catch (e) {
             setMovieTitles([])
+            console.error('error fetching movies', e)
         } finally {
             setIsFetching(false)
         }
@@ -50,6 +51,7 @@ function App() {
                             setRecommendations(recommendations);
                         } catch (e) {
                             setRecommendations([])
+                            console.error('error fetching recommendation', e)
                         } finally {
                             setIsFetching(false)
                         }
