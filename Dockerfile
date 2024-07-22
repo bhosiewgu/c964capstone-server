@@ -10,7 +10,7 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 # Expose the port
-EXPOSE 8007
+EXPOSE 8015
 
 # Command to run when container starts
-CMD ["uvicorn", "main:app", "--reload", "--port=8007", "--host=0.0.0.0", "--lifespan", "off"]
+CMD ["uvicorn", "main:app", "--reload", "--port=8015", "--host=0.0.0.0", "--lifespan", "off"]
