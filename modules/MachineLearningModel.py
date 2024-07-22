@@ -52,6 +52,7 @@ def load_machine_learning_data():
     movies = movies[["movie_id", "title", "overview", "genres", "keywords", "cast", "crew"]]
     # remove duplicates
     movies.dropna(inplace=True)
+    movies.drop_duplicates(subset=['movie_id'], keep='first', inplace=True)
     # normalize these objects from objects to lists of plucked values
     movies["genres"] = movies["genres"].apply(lambda json_data: normalize_column(json_data, "name"))
     movies["keywords"] = movies["keywords"].apply(lambda json_data: normalize_column(json_data, "name"))
@@ -115,6 +116,7 @@ class MachineLearningModel:
         pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
 
     def evaluate_algorithm(self):
+        # # This script gives me a merged CSV to look at
         # movies_data_frame = pandas.read_csv(get_resource("tmdb_5000_movies.csv"))
         # credits_data_frame = pandas.read_csv(get_resource("tmdb_5000_credits.csv"))
         # # combine the datasets on "title"
@@ -133,63 +135,64 @@ class MachineLearningModel:
         title_to_index = {title: idx for idx, title in enumerate(self.training_data['title'])}
         num_movies = len(self.training_data)
 
-        # Example symmetric relation list of related movies
         symmetric_relations = [
-            "Spider-Man", "Spider-Man 2", "Spider-Man 3",
-            "The Amazing Spider-Man", "The Amazing Spider-Man 2"
+            [
+                "Spider-Man", "Spider-Man 2", "Spider-Man 3",
+                "The Amazing Spider-Man", "The Amazing Spider-Man 2"
+            ],
+            [
+                "Batman", "The Dark Knight", "The Dark Knight Rises", "Batman: The Dark Knight Returns, Part 2",
+                "Batman Begins", "Batman & Robin", "Batman Forever", "Batman Returns"
+            ],
+            [
+                "Pirates of the Caribbean: Dead Man's Chest", "Pirates of the Caribbean: On Stranger Tides",
+                "Pirates of the Caribbean: The Curse of the Black Pearl", "Pirates of the Caribbean: At World's End"
+            ],
+            [
+                "Star Trek III: The Search for Spock", "Star Trek II: The Wrath of Khan", "Star Trek: First Contact",
+                "Star Trek: Generations", "Star Trek: The Motion Picture", "Star Trek V: The Final Frontier",
+                "Star Trek VI: The Undiscovered Country", "Star Trek IV: The Voyage Home", "Star Trek Into Darkness",
+                "Star Trek: Insurrection", "Star Trek: Nemesis", "Star Trek Beyond", "Star Trek"
+            ],
+            [
+                "GoldenEye", "The World Is Not Enough", "Die Another Day", "Tomorrow Never Dies", "Moonraker",
+                "A View to a Kill", "For Your Eyes Only", "Octopussy", "The Spy Who Loved Me", "Live and Let Die",
+                "The Man with the Golden Gun", "Goldfinger", "From Russia with Love", "Dr. No", "Never Say Never Again",
+                "You Only Live Twice", "Thunderball", "Diamonds Are Forever", "Spectre", "Quantum of Solace", "Skyfall",
+                "Casino Royale", "Licence to Kill", "The Living Daylights", "On Her Majesty's Secret Service"
+            ]
         ]
-
-        # for title in symmetric_relations:
-        #     index = title_to_index.get(title, -1)
-        #     print(f"Title: {title}, Index: {index}")
 
         ground_truth_labels = numpy.zeros((num_movies, num_movies))
 
         # Set reflective relationships based on symmetric_relations
-        for movie1_title in symmetric_relations:
-            for movie2_title in symmetric_relations:
-                if movie1_title != movie2_title:
-                    movie1_index = title_to_index.get(movie1_title)
-                    movie2_index = title_to_index.get(movie2_title)
-                    ground_truth_labels[movie1_index, movie2_index] = 1
-                    ground_truth_labels[movie2_index, movie1_index] = 1
+        for symmetric_group in symmetric_relations:
+            for movie1_title in symmetric_group:
+                for movie2_title in symmetric_group:
+                    if movie1_title != movie2_title:
+                        movie1_index = title_to_index.get(movie1_title)
+                        movie2_index = title_to_index.get(movie2_title)
+                        ground_truth_labels[movie1_index, movie2_index] = 1
+                        ground_truth_labels[movie2_index, movie1_index] = 1
 
         print("Ground Labels generated")
-        # print(ground_truth_labels)
-        #
-        # # Count number of 1's and get their indices
-        # num_ones_ground_table = numpy.sum(ground_truth_labels == 1)
-        # indices_of_ones_ground_table = numpy.argwhere(ground_truth_labels == 1)
-        #
-        # print(f"Number of 1's: {num_ones_ground_table}")
-        # print("Indices of 1's:")
-        # for index in indices_of_ones_ground_table:
-        #     print(f"- {tuple(index)}")
 
         truth_table = numpy.zeros((num_movies, num_movies))
 
-        for movie_title in symmetric_relations:
-            searched_movie_index = title_to_index.get(movie_title)
-            recommendation_data = self.get_recommendations(movie_title)
-            recommendations = recommendation_data["recommendations"]
-            for recommendation in recommendations:
-                if movie_title != recommendation["title"]:
-                    recommendation_index = recommendation["movie_index"]
-                    truth_table[searched_movie_index, recommendation_index] = 1
-                    truth_table[recommendation_index, searched_movie_index] = 1
+        for symmetric_group in symmetric_relations:
+            for movie_title in symmetric_group:
+                searched_movie_index = title_to_index.get(movie_title)
+                recommendation_data = self.get_recommendations(movie_title)
+                recommendations = recommendation_data["recommendations"]
+                for recommendation in recommendations:
+                    if movie_title != recommendation["title"]:
+                        recommendation_index = recommendation["movie_index"]
+                        truth_table[searched_movie_index, recommendation_index] = 1
+                        truth_table[recommendation_index, searched_movie_index] = 1
 
         print("Truth Table generated")
 
-        # # Count number of 1's and get their indices
-        # num_ones_truth = numpy.sum(truth_table == 1)
-        # indices_of_ones_truth_table = numpy.argwhere(truth_table == 1)
-        #
-        # print(f"Number of 1's: {num_ones_truth}")
-        # print("Indices of 1's:")
-        # for index in indices_of_ones_truth_table:
-        #     print(f"- {tuple(index)}")
-
-        print("Flattening....")
+        print("Flattening")
         y_true = ground_truth_labels.flatten()
         y_pred = truth_table.flatten()
 
