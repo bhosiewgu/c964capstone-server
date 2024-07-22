@@ -22,10 +22,8 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-
 app.mount("/static", StaticFiles(directory="www"), name="static")
 app.mount("/assets", StaticFiles(directory="www/assets"), name="assets")
-
 
 training_module = TrainingModule()
 training_module.train_model()
@@ -52,3 +50,6 @@ def get_movie_titles():
     titles = movie_recommender.get_movie_titles()
     print(type(titles))
     return {"movie_titles": movie_recommender.get_movie_titles()}
+
+
+movie_recommender.evaluate_algorithm()

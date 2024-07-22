@@ -62,7 +62,7 @@ function App() {
 
                     fetchData();
                 } else {
-                    setRecommendations(freshRecommendationsData)
+                    setRecommendationsData(freshRecommendationsData)
                 }
             }}
         />
