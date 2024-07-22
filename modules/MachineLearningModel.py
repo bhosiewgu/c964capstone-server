@@ -145,6 +145,8 @@ class MachineLearningModel:
         # Mapping movie titles to their indices in the DataFrame
         title_to_index = {title: idx for idx, title in enumerate(self.training_data['title'])}
         num_movies = len(self.training_data)
+        ground_truth_labels = numpy.zeros((num_movies, num_movies))
+        truth_table_predictions = numpy.zeros((num_movies, num_movies))
 
         # These groups are expected to be mutually exclusive for when the top 5 recommendations come back
         symmetric_relations = [
@@ -175,41 +177,43 @@ class MachineLearningModel:
             ]
         ]
 
-        count = 0
         for symmetric_group in symmetric_relations:
-            count = count + len(symmetric_group)
-
-        ground_truth_labels = numpy.zeros((num_movies, num_movies))
-
-        for symmetric_group in symmetric_relations:
-            for movie1_title in symmetric_group:
-                for movie2_title in symmetric_group:
-                    if movie1_title != movie2_title:
-                        movie1_index = title_to_index.get(movie1_title)
-                        movie2_index = title_to_index.get(movie2_title)
-                        ground_truth_labels[movie1_index, movie2_index] = 1
-                        ground_truth_labels[movie2_index, movie1_index] = 1
+            for i in range(len(symmetric_group)):
+                for j in range(i + 1, len(symmetric_group)):
+                    movie1_index = title_to_index[symmetric_group[i]]
+                    movie2_index = title_to_index[symmetric_group[j]]
+                    ground_truth_labels[movie1_index, movie2_index] = 1
+                    ground_truth_labels[movie2_index, movie1_index] = 1  # Reflective relation
 
         print("Ground Labels generated")
 
-        truth_table = numpy.zeros((num_movies, num_movies))
-
         for symmetric_group in symmetric_relations:
+            # Iterate through each movie in the symmetric group
             for movie_title in symmetric_group:
+                # Get the index of the movie in the training data
                 searched_movie_index = title_to_index.get(movie_title)
+
+                # Get recommendations for the current movie
                 recommendation_data = self.get_recommendations(movie_title)
                 recommendations = recommendation_data["recommendations"]
+                print(f"got recommendations for {movie_title}")
+
+                # Iterate through recommendations
                 for recommendation in recommendations:
-                    if movie_title != recommendation["title"]:
-                        recommendation_index = recommendation["movie_index"]
-                        truth_table[searched_movie_index, recommendation_index] = 1
-                        truth_table[recommendation_index, searched_movie_index] = 1
+                    recommendation_title = recommendation["title"]
+                    recommendation_index = title_to_index.get(recommendation_title)
+
+                    # Ensure movie_title is not recommended to itself
+                    if searched_movie_index != recommendation_index:
+                        # Set both directions in the truth table to 1
+                        truth_table_predictions[searched_movie_index, recommendation_index] = 1
+                        truth_table_predictions[recommendation_index, searched_movie_index] = 1
 
         print("Truth Table generated")
 
         print("Flattening")
         y_ground = ground_truth_labels.flatten()
-        y_predict = truth_table.flatten()
+        y_predict = truth_table_predictions.flatten()
 
         # Calculate precision, recall, and f1-score
         print("Calculating Scores")
