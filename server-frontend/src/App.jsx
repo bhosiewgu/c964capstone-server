@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Autocomplete from '@mui/joy/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
+import Link from '@mui/material/Link';
 import Input from '@mui/joy/Input';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
@@ -38,8 +39,18 @@ function App() {
 
   return (
     <>
+      <div style={{marginBottom: 100}}>
+          <Link
+            href={"https://github.com/bhosiewgu/c964capstone-notebook/blob/main/Data%20Transform.ipynb"}
+            target={"_blank"}
+            rel={"noopener"}
+          >
+            Jupyter Notebook Results
+          </Link>
+      </div>
       <div>
-        <h1>WatchFlicks</h1>
+        <h1 style={{marginBottom: 0}}>WatchFlicks</h1>
+        <h6 style={{marginTop: 10}}>By Brent Hosie</h6>
         <Autocomplete
             disabled={isFetching}
             options={movieTitles}
