@@ -135,6 +135,7 @@ class MachineLearningModel:
         title_to_index = {title: idx for idx, title in enumerate(self.training_data['title'])}
         num_movies = len(self.training_data)
 
+        # These groups are expected to be mutually exclusive for when the top 5 recommendations come back
         symmetric_relations = [
             [
                 "Spider-Man", "Spider-Man 2", "Spider-Man 3",
@@ -165,7 +166,6 @@ class MachineLearningModel:
 
         ground_truth_labels = numpy.zeros((num_movies, num_movies))
 
-        # Set reflective relationships based on symmetric_relations
         for symmetric_group in symmetric_relations:
             for movie1_title in symmetric_group:
                 for movie2_title in symmetric_group:
@@ -193,15 +193,15 @@ class MachineLearningModel:
         print("Truth Table generated")
 
         print("Flattening")
-        y_true = ground_truth_labels.flatten()
-        y_pred = truth_table.flatten()
+        y_ground = ground_truth_labels.flatten()
+        y_predict = truth_table.flatten()
 
         # Calculate precision, recall, and f1-score
         print("Calculating Scores")
         start_time = time.time()
-        precision = precision_score(y_true, y_pred)
-        recall = recall_score(y_true, y_pred)
-        f1 = f1_score(y_true, y_pred)
+        precision = precision_score(y_ground, y_predict)
+        recall = recall_score(y_ground, y_predict)
+        f1 = f1_score(y_ground, y_predict)
         end_time = time.time()
 
         # Print the metrics
