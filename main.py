@@ -30,7 +30,8 @@ training_module.train_model()
 
 movie_recommender = MachineLearningModel(
     training_module.load_training_data(),
-    training_module.load_similarity_scores_data()
+    training_module.load_nearest_neighbor_data(),
+    training_module.load_tfid_matrix_data()
 )
 
 
@@ -52,4 +53,4 @@ def get_movie_titles():
     return {"movie_titles": movie_recommender.get_movie_titles()}
 
 
-movie_recommender.evaluate_algorithm()
+# movie_recommender.evaluate_algorithm()

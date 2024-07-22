@@ -1,16 +1,16 @@
 import os
 import numpy
 import pandas
-from sklearn.feature_extraction.text import CountVectorizer
 import json
 import re
 from nltk.stem import PorterStemmer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
 import pickle
 import time
 
 text_stemmer = PorterStemmer()
-count_vectorizer = CountVectorizer(max_features=5000, stop_words="english")
+tfid_vectorizer = TfidfVectorizer(stop_words='english')
 
 
 # given a file in src.resources, return that file's path
@@ -66,37 +66,44 @@ def load_machine_learning_data():
             movies["overview"] + movies["genres"] + movies["keywords"] + movies["cast"] + movies["crew"]
     ).apply(lambda str_text: " ".join(str_text).lower())
     training_data["stemmed"] = training_data["stemmed"].apply(stem_text)
-    similarity_vectors = count_vectorizer.fit_transform(training_data["stemmed"]).toarray()
-    similarity_scores = cosine_similarity(similarity_vectors)
 
-    return {"similarity_scores": similarity_scores, "training_data": training_data}
+    tfid_matrix = tfid_vectorizer.fit_transform(training_data["stemmed"]).toarray()
+    nn = NearestNeighbors(n_neighbors=6, metric='cosine')
+    nn.fit(tfid_matrix)
+
+    return {"nearest_neighbors": nn, "tfid_matrix": tfid_matrix, "training_data": training_data}
 
 
 class MachineLearningModel:
-    def __init__(self, training_data=None, similarity_scores=None):
+    def __init__(self, training_data=None, nearest_neighbors=None, tfid_matrix=None):
         # no need to train
-        if training_data is not None and similarity_scores is not None:
+        if training_data is not None and nearest_neighbors is not None and tfid_matrix is not None:
             self.training_data = training_data
-            self.similarity_scores = similarity_scores
+            self.nearest_neighbors = nearest_neighbors
+            self.tfid_matrix = tfid_matrix
         else:
             training_model = load_machine_learning_data()
             self.training_data = training_model["training_data"]
-            self.similarity_scores = training_model["similarity_scores"]
+            self.nearest_neighbors = training_model["nearest_neighbors"]
+            self.tfid_matrix = training_model["tfid_matrix"]
 
     def get_recommendations(self, movie_title):
         try:
-            index = self.training_data[self.training_data["title"] == movie_title].index[0]
-            distances = sorted(list(enumerate(self.similarity_scores[index])), reverse=True, key=lambda x: x[1])
+            index = self.training_data[self.training_data['title'] == movie_title].index[0]
+            query_vector = numpy.array([self.tfid_matrix[index]])
+            distances, indices = self.nearest_neighbors.kneighbors(query_vector)
 
             # Using list comprehension to collect recommendations
             recommendations = [
                 {
-                    'movie_index': int(i[0]),
-                    'title': self.training_data.iloc[i[0]]['title'],
-                    'movie_id': int(self.training_data.iloc[i[0]]['movie_id'])
+                    'movie_index': int(self.training_data.iloc[i]['movie_id']),
+                    # Assuming 'movie_id' is the column name
+                    'title': self.training_data.iloc[i]['title'],
+                    'movie_id': int(self.training_data.iloc[i]['movie_id'])
                 }
-                for i in distances[1:6]
+                for i in indices[0][1:6]  # Exclude the first index (itself) and take the top 5 recommendations
             ]
+
             return {"recommendations": recommendations, "original_movie_index": int(index),
                     "original_movie_title": movie_title}
         except IndexError:
@@ -110,10 +117,14 @@ class MachineLearningModel:
             os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'training_data.pkl')
         )
         pickle.dump(self.training_data, open(training_data_path, 'wb'))
-        similarity_score_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'similarity_scores.pkl')
+        nearest_neighbors_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'nearest_neighbors.pkl')
         )
-        pickle.dump(self.similarity_scores, open(similarity_score_path, 'wb'))
+        pickle.dump(self.nearest_neighbors, open(nearest_neighbors_path, 'wb'))
+        tfid_matrix_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'artifacts', 'tfid_matrix.pkl')
+        )
+        pickle.dump(self.tfid_matrix, open(tfid_matrix_path, 'wb'))
 
     def evaluate_algorithm(self):
         # # This script gives me a merged CSV to look at
@@ -163,6 +174,10 @@ class MachineLearningModel:
                 "Casino Royale", "Licence to Kill", "The Living Daylights", "On Her Majesty's Secret Service"
             ]
         ]
+
+        count = 0
+        for symmetric_group in symmetric_relations:
+            count = count + len(symmetric_group)
 
         ground_truth_labels = numpy.zeros((num_movies, num_movies))
 
